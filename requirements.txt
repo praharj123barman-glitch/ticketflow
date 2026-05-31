@@ -1,0 +1,16 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+sqlalchemy==2.0.50
+psycopg[binary]==3.3.4
+redis==8.0.0
+pydantic==2.13.4
+pydantic-settings==2.14.1
+email-validator==2.3.0
+python-jose[cryptography]==3.5.0
+bcrypt==5.0.0
+python-multipart==0.0.29
+
+# dev / test
+pytest==9.0.3
+httpx==0.28.1

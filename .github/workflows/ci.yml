@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Real Postgres + Redis as service containers so the locking tests are valid.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ticketflow
+          POSTGRES_PASSWORD: ticketflow
+          POSTGRES_DB: ticketflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ticketflow"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://ticketflow:ticketflow@localhost:5432/ticketflow
+      REDIS_URL: redis://localhost:6379/0
+      JWT_SECRET: ci-secret
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v

@@ -1,0 +1,62 @@
+# Full production-shaped stack: nginx -> api (gunicorn) -> postgres + redis.
+# On a VM:  docker compose up -d --build  &&  docker compose exec api python seed.py
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ticketflow
+      POSTGRES_PASSWORD: ticketflow
+      POSTGRES_DB: ticketflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "5432:5432"  # exposed for local dev/tests; remove on a public VM
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "6379:6379"  # exposed for local dev/tests; remove on a public VM
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://ticketflow:ticketflow@db:5432/ticketflow
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      ENVIRONMENT: production
+      WEB_CONCURRENCY: 4
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      # - "443:443"   # enable with TLS certs mounted
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:
