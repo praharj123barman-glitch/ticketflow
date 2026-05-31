@@ -45,7 +45,11 @@ async def _hold_sweeper() -> None:
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    Base.metadata.create_all(bind=engine)  # dev convenience; prod uses Alembic (see docs)
+    # In development we auto-create tables for convenience. In production the
+    # schema is owned by Alembic migrations (`alembic upgrade head`, run by the
+    # container entrypoint) — so we never silently diverge from the migration history.
+    if settings.environment != "production":
+        Base.metadata.create_all(bind=engine)
     sweeper = asyncio.create_task(_hold_sweeper())
     logger.info("TicketFlow started (env=%s)", settings.environment)
     try:

@@ -18,6 +18,12 @@ from app.database import SessionLocal
 from app.models import Booking, Event, Seat, SeatStatus, User
 from app.services import booking_service
 from app.services.booking_service import SeatUnavailableError
+from app.services.lock import LockAcquisitionError
+
+# Both are legitimate "did not get the seat" outcomes under contention: the seat
+# was already taken (409) OR we couldn't grab the lock in time (503 retry). Either
+# way it is NOT a successful booking — which is exactly what we assert.
+CONTENTION_REJECTIONS = (SeatUnavailableError, LockAcquisitionError)
 
 
 def _make_users(db, n: int) -> list[int]:
@@ -49,7 +55,7 @@ def test_concurrent_booking_single_seat_yields_exactly_one_winner(db):
         try:
             booking_service.confirm_booking(session, user_id, event_id, [seat_id])
             return "success"
-        except SeatUnavailableError:
+        except CONTENTION_REJECTIONS:
             return "rejected"
         finally:
             session.close()
@@ -90,7 +96,7 @@ def test_concurrent_booking_distinct_seats_all_succeed(db):
         try:
             booking_service.confirm_booking(session, user_id, event.id, [seat_id])
             return "success"
-        except SeatUnavailableError:
+        except CONTENTION_REJECTIONS:
             return "rejected"
         finally:
             session.close()

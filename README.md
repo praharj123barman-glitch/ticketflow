@@ -128,17 +128,39 @@ docker compose exec api python seed.py
 - `nginx` is the public entrypoint (TLS, edge rate limiting, real-IP forwarding).
 - Health: `GET /health` (liveness), `GET /ready` (DB + Redis reachability).
 
-> Schema is auto-created on startup for convenience. For real production,
-> introduce Alembic migrations (noted as the upgrade path in the docs).
+## Database migrations (Alembic)
+The schema is owned by Alembic migrations. The Docker entrypoint runs
+`alembic upgrade head` automatically before starting gunicorn; in dev the app
+also auto-creates tables for convenience (gated to `ENVIRONMENT != production`).
+```bash
+alembic revision --autogenerate -m "describe change"   # create a migration
+alembic upgrade head                                    # apply
+alembic downgrade -1                                    # roll back one
+```
+
+## Frontend (React seat picker)
+A small Vite + React + TypeScript + Tailwind + Framer Motion client lives in
+[`frontend/`](frontend/). It renders the live seat map, lets you select and book
+seats, shows your bookings, and polls every few seconds so you can watch seats
+get taken in real time.
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173 (proxies /api -> the FastAPI server)
+```
+In production, build static assets (`npm run build`) and set `VITE_API_URL` to
+the public API origin.
 
 ## Project layout
 ```
 app/            application code (see docs/LLD.md §6 for the full map)
+alembic/        database migrations (versioned schema)
+frontend/       React + Vite seat-picker UI
 tests/          pytest suite incl. the concurrency test
-loadtest/       k6 script
+loadtest/       k6 script + dependency-light Python load runner
 nginx/          reverse-proxy config
 docs/           HLD.md + LLD.md (system design)
-Dockerfile · docker-compose.yml · gunicorn_conf.py · .github/workflows/ci.yml
+Dockerfile · docker-compose.yml · gunicorn_conf.py · entrypoint.sh · .github/workflows/ci.yml
 ```
 
 ## Roadmap to L4 (live users)
