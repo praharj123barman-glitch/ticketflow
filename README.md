@@ -1,5 +1,7 @@
 # 🎟️ TicketFlow — Concurrent Event Booking System
 
+[![CI](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml/badge.svg)](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml)
+
 A production-shaped backend for booking event tickets where thousands of users
 compete for the **same limited seats** at once. The engineering centrepiece is a
 **two-layer concurrency-control mechanism** (Redis distributed lock + PostgreSQL
