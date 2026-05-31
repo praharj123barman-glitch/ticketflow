@@ -2,6 +2,11 @@
 
 [![CI](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml/badge.svg)](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml)
 
+### 🔴 Live demo
+- **App (Vercel):** https://frontend-seven-delta-18.vercel.app — demo login `demo@ticketflow.dev` / `password123`
+- **API + Swagger:** https://ticketflow-prohorj.duckdns.org/docs
+- Deployed on AWS EC2 (nginx + gunicorn + Docker) with Let's Encrypt HTTPS — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 A production-shaped backend for booking event tickets where thousands of users
 compete for the **same limited seats** at once. The engineering centrepiece is a
 **two-layer concurrency-control mechanism** (Redis distributed lock + PostgreSQL
