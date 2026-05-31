@@ -65,6 +65,7 @@ app = FastAPI(
     version="1.0.0",
     summary="Concurrent event-ticket booking system with two-layer double-booking protection.",
     lifespan=lifespan,
+    root_path=settings.root_path,
 )
 
 app.add_middleware(

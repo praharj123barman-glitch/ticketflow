@@ -29,5 +29,10 @@ class Settings(BaseSettings):
 
     environment: str = "development"
 
+    # When the API is served behind a path prefix (e.g. nginx routes /api/* to
+    # it while serving the SPA at /), set root_path="/api" so the OpenAPI docs
+    # generate correct URLs. Empty in local dev / CI.
+    root_path: str = ""
+
 
 settings = Settings()

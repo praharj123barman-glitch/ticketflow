@@ -2,10 +2,10 @@
 
 [![CI](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml/badge.svg)](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml)
 
-### 🔴 Live demo
-- **App (Vercel):** https://frontend-seven-delta-18.vercel.app — demo login `demo@ticketflow.dev` / `password123`
-- **API + Swagger:** https://ticketflow-prohorj.duckdns.org/docs
-- Deployed on AWS EC2 (nginx + gunicorn + Docker) with Let's Encrypt HTTPS — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+### 🔴 Live demo — one self-hosted HTTPS origin
+- **App:** https://ticketflow-prohorj.duckdns.org — demo login `demo@ticketflow.dev` / `password123`
+- **API + Swagger:** https://ticketflow-prohorj.duckdns.org/api/docs
+- Deployed on AWS EC2: a single nginx serves the React build at `/` and reverse-proxies the API at `/api/*` to gunicorn, with Let's Encrypt HTTPS — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 A production-shaped backend for booking event tickets where thousands of users
 compete for the **same limited seats** at once. The engineering centrepiece is a
@@ -153,8 +153,9 @@ cd frontend
 npm install
 npm run dev          # http://localhost:5173 (proxies /api -> the FastAPI server)
 ```
-In production, build static assets (`npm run build`) and set `VITE_API_URL` to
-the public API origin.
+In production the built assets are served by the same nginx that proxies the API
+(single origin — no `VITE_API_URL` needed, calls go to `/api`). See
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Project layout
 ```

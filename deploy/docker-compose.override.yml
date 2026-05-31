@@ -1,0 +1,14 @@
+# Production override (single-origin HTTPS). docker compose auto-merges a file
+# named docker-compose.override.yml, so copy this to the repo root on the server.
+# It: opens 443, mounts the Let's Encrypt certs and the React build into nginx,
+# and sets ROOT_PATH=/api so FastAPI's docs work behind the /api prefix.
+services:
+  api:
+    environment:
+      ROOT_PATH: /api
+  nginx:
+    ports:
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
