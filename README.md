@@ -90,22 +90,22 @@ pytest -v
 Headline test (`tests/test_booking_concurrency.py`): 50 threads race for one seat
 → asserts **exactly 1 booking, 49 rejected, 0 double-bookings**.
 
-## Load test (k6)
-```bash
-docker compose up -d --build
-docker compose exec api python seed.py
-k6 run -e BASE_URL=http://localhost -e EVENT_ID=1 -e SEAT_ID=1 loadtest/booking_load_test.js
-```
-Expected: one `seat_booked_201`, the rest `409/429/503`, never two 201s for the
-same seat.
+## Load tests — two different questions
 
-No k6? A dependency-light equivalent ships in the repo:
+There are **two** load tests because they answer two different questions. They
+are reported separately on purpose; conflating them is how you get a misleading
+number.
+
+### 1. Correctness under contention (worst case)
+*Does the two-layer lock hold when everyone fights for the **same** seat?*
 ```bash
+docker compose up -d --build && docker compose exec api python seed.py
+k6 run -e BASE_URL=http://localhost -e EVENT_ID=1 -e SEAT_ID=1 loadtest/booking_load_test.js
+# no k6? dependency-light equivalent:
 python loadtest/python_load.py --base-url http://127.0.0.1:8000 --event-id 1 --seat-id 1 --users 100
 ```
-
-**Measured result** (100 concurrent users contesting a single seat; single dev
-uvicorn worker, local Postgres 16 + Redis):
+**Measured** (100 concurrent users contesting a single seat; single dev uvicorn
+worker, local Postgres 16 + Redis):
 
 | Metric | Value |
 |---|---|
@@ -113,12 +113,69 @@ uvicorn worker, local Postgres 16 + Redis):
 | Successful bookings (201) for 1 seat | **1** |
 | Conflicts (409 seat taken) | **99** |
 | **Double-bookings** | **0** ✅ |
-| Booking latency p50 / p95 | ~2.8 s / ~3.5 s* |
+| Booking latency p50 / p95 | ~2.8 s / ~3.5 s |
 
-\* Latency reflects 100 threads serialising on one contested seat through a
-single dev worker (plus per-user bcrypt register/login in the harness). It is a
-correctness stress test, not a throughput benchmark — production runs multiple
-gunicorn workers behind nginx and contention is spread across thousands of seats.
+This is a **correctness** stress test: 100 threads serialise on one contested
+seat, so latency is high by design. The number that matters is **0 double-bookings**.
+
+### 2. Throughput at low contention (realistic)
+*How many bookings/sec can the engine sustain when load is spread across many
+seats/events — what a real on-sale looks like once the initial rush settles?*
+
+`loadtest/throughput.py` runs the full **hold → pay → confirm** path for every
+booking, each targeting a **different** seat, and self-cleans (cancels its
+bookings) so a worker-count sweep is repeatable. Run the same command against the
+server configured with 1, 2, then 4 gunicorn workers:
+```bash
+# on the server, per worker count N:
+WEB_CONCURRENCY=N RATE_LIMIT_PER_MINUTE=1000000 docker compose up -d --force-recreate api
+docker compose run --rm --no-deps --entrypoint python api \
+  loadtest/throughput.py --base-url http://api:8000 --concurrency 32 --bookings 400 --label "N workers"
+```
+
+**Measured** — live **AWS EC2 t3.small (2 vCPU, 2 GB)**, real gunicorn → uvicorn
+workers behind nginx, Postgres 16 + Redis, single-origin HTTPS. Load client (32
+concurrent) co-located on the box; the per-client rate limit was raised for the
+run so the benchmark measures the **engine**, not the protective throttle. Each
+"booking" = **2 sequential API calls** (`POST /holds` then confirm); latency is
+end-to-end per booking.
+
+| gunicorn workers | Throughput | p50 | p99 | success |
+|---|---|---|---|---|
+| 1 | 31 bookings/sec | 967 ms | 1525 ms | 400/400 |
+| 2 | **39 bookings/sec** | 757 ms | 1724 ms | 400/400 |
+| 4 | 36 bookings/sec | 805 ms | 1942 ms | 400/400 |
+
+Throughput peaks at **2 workers** — the box has 2 vCPUs, so past that the workers
+oversubscribe the cores (and the co-located client competes for CPU). That knee
+at `workers ≈ cores` is the expected shape; on a larger instance it moves right.
+Every run booked **400/400 with zero double-bookings** — i.e. correctness held at
+throughput, not just under the single-seat stress test.
+
+## Demo & sharing checklist
+A 10-minute routine to get real visitors and real numbers:
+
+1. **Seed events** (already done on the live box; re-run any time):
+   `docker compose exec api python seed.py` — idempotent, adds the 4 events.
+2. **Sanity-check the live site**: open the [landing page](https://ticketflow-prohorj.duckdns.org),
+   click **Try a sample event** (no signup) and complete one booking end-to-end.
+3. **Grab share links** — one per event, they preview with a title + image:
+   - `https://ticketflow-prohorj.duckdns.org/e/1` (Coldplay), `/e/2`, `/e/3`, `/e/4`
+   - Paste a link into **WhatsApp** and **LinkedIn** to confirm the OpenGraph card
+     renders (title, description, the generated `/og/event/{id}.png`). Use the
+     [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) to force a re-scrape.
+4. **Share in a few places** — a class/college WhatsApp group, a LinkedIn post,
+   a Reddit/Discord community. Each unique visitor counts once in the funnel.
+5. **Watch conversions**: open the [organizer dashboard](https://ticketflow-prohorj.duckdns.org/dashboard)
+   (login `organizer@ticketflow.dev` / `password123`), pick an event, and watch
+   **Viewed → Held → Paid** climb.
+
+### What to screenshot for the résumé / portfolio
+- **The throughput table above** (bookings/sec at p50/p99 across 1/2/4 workers).
+- **Organizer dashboard** funnel bars + conversion % once you have real traffic.
+- **The live seat map** mid-interaction (a few seats selected/held/sold).
+- **A WhatsApp/LinkedIn link preview** showing the per-event OG card.
+- **`pytest -v`** output (all tests green) next to the contention-test assertion.
 
 ## Production deploy (the L2 way, on an AWS EC2 / GCP VM)
 ```bash
