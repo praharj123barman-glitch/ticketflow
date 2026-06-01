@@ -4,6 +4,7 @@ from __future__ import annotations
 import datetime as dt
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -65,11 +66,12 @@ def get_seat_map(event_id: int, db: Session = Depends(get_db)) -> list[dict]:
     return seatcache.get_seat_map(db, event_id)
 
 
-@router.post("/{event_id}/view", status_code=status.HTTP_204_NO_CONTENT)
-def record_view(event_id: int, beacon: ViewBeacon, db: Session = Depends(get_db)) -> None:
+@router.post("/{event_id}/view", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
+def record_view(event_id: int, beacon: ViewBeacon, db: Session = Depends(get_db)) -> Response:
     """Public funnel beacon — counts a unique visitor for an event (top of the
     viewed -> held -> paid funnel). Deduped per browser session; no auth so it
     fires for anonymous visitors too."""
     if db.get(Event, event_id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
     analytics_service.record_view(db, event_id, beacon.session_token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
