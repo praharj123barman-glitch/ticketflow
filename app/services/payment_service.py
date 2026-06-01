@@ -27,17 +27,28 @@ def _client():
     return stripe
 
 
+def _return_urls(hold_id: int) -> tuple[str, str]:
+    """Build the post-payment success/cancel URLs from the public origin so they
+    resolve correctly in every environment (no hardcoded localhost). Stripe
+    substitutes the {CHECKOUT_SESSION_ID} template on the success redirect."""
+    base = settings.public_base_url.rstrip("/")
+    success = f"{base}/booking/success?hold={hold_id}&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel = f"{base}/booking/cancel?hold={hold_id}"
+    return success, cancel
+
+
 def create_checkout_session(hold_id: int, line_items: list[tuple[str, int]]) -> tuple[str, str]:
     """Create a Checkout Session for a hold. Returns (session_id, checkout_url).
     Idempotency-Key is keyed on the hold so a double-click can't open two
     sessions / charge twice. line_items: list of (label, amount_cents)."""
-    success = settings.checkout_success_url.replace("{HOLD_ID}", str(hold_id))
-    cancel = settings.checkout_cancel_url.replace("{HOLD_ID}", str(hold_id))
+    success, cancel = _return_urls(hold_id)
 
     if not stripe_enabled():
-        # Deterministic fake: same hold -> same session id (idempotent).
+        # Deterministic fake: same hold -> same session id (idempotent). The URL
+        # isn't navigated to (the frontend detects the fake id and confirms via
+        # the dev endpoint), but keep it well-formed anyway.
         sid = f"cs_test_fake_{hold_id}"
-        return sid, f"{success}&session_id={sid}"
+        return sid, success.replace("{CHECKOUT_SESSION_ID}", sid)
 
     s = _client().checkout.Session.create(
         mode="payment",

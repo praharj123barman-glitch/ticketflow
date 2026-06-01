@@ -29,8 +29,7 @@ class Settings(BaseSettings):
     stripe_webhook_secret: str = ""
     stripe_publishable_key: str = ""
     currency: str = "inr"
-    checkout_success_url: str = "http://localhost:5173/booking/success?hold={HOLD_ID}"
-    checkout_cancel_url: str = "http://localhost:5173/booking/cancel?hold={HOLD_ID}"
+    # Post-payment return URLs are derived from public_base_url (see payment_service).
 
     # Email. Leave smtp_host empty for the dev backend (logs + in-memory outbox).
     smtp_host: str = ""

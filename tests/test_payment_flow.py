@@ -135,6 +135,18 @@ def test_double_submit_confirm_one_booking(db):
     assert db.get(Seat, seat_ids[0]).status == SeatStatus.SOLD
 
 
+# ---- checkout return URLs derive from the public origin ----
+def test_checkout_urls_derive_from_public_base_url(monkeypatch):
+    from app.config import settings
+    from app.services import payment_service
+
+    monkeypatch.setattr(settings, "public_base_url", "https://tickets.example.com")
+    success, cancel = payment_service._return_urls(42)
+    assert success.startswith("https://tickets.example.com/booking/success?hold=42")
+    assert "{CHECKOUT_SESSION_ID}" in success           # Stripe substitutes this
+    assert cancel == "https://tickets.example.com/booking/cancel?hold=42"
+
+
 # ---- dev-confirm endpoint (offline pay -> confirm beat) ----
 def test_dev_confirm_creates_confirmed_booking_with_tickets(client, auth_token, event_with_seats):
     event_id, seat_ids = event_with_seats

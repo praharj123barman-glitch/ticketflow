@@ -156,6 +156,12 @@ export const api = {
   devConfirm: (holdId: number) => req<Booking>(`/holds/${holdId}/dev-confirm`, { method: "POST" }),
 
   myBookings: () => req<Booking[]>("/bookings"),
+  // Find the booking a hold converted into (used on the Stripe success return,
+  // where the webhook creates the booking server-side a moment after redirect).
+  async bookingByHold(holdId: number): Promise<Booking | null> {
+    const all = await req<Booking[]>("/bookings").catch(() => [] as Booking[]);
+    return all.find((b) => b.hold_id === holdId) ?? null;
+  },
   cancel: (bookingId: number) => req<Booking>(`/bookings/${bookingId}/cancel`, { method: "POST" }),
   // QR is served as an auth-gated SVG, so we fetch it with the bearer token and
   // return the markup to inline (no <img src> — that wouldn't carry the header).

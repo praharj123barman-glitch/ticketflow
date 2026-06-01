@@ -11,18 +11,20 @@ import { Checkout } from "./Checkout";
 import { Confirmation } from "./Confirmation";
 import { Landing } from "./Landing";
 import { Dashboard } from "./Dashboard";
-import { eventIdFromUrl, isDashboardUrl, setUrl } from "./routing";
+import { BookingReturn } from "./BookingReturn";
+import { bookingReturnFromUrl, eventIdFromUrl, isDashboardUrl, setUrl } from "./routing";
 import { sceneVariants, springs } from "./motion";
 
 const inr = (cents: number) => `₹${(cents / 100).toLocaleString("en-IN")}`;
 const MAX = 8;
 
-type View = "landing" | "auth" | "dashboard" | "event";
+type View = "landing" | "auth" | "dashboard" | "event" | "return";
 
 export default function App() {
   const [eventId, setEventId] = useState<number | null>(() => eventIdFromUrl());
+  const ret = bookingReturnFromUrl();
   const [view, setView] = useState<View>(() =>
-    isDashboardUrl() ? "dashboard" : eventIdFromUrl() != null ? "event" : "landing",
+    ret ? "return" : isDashboardUrl() ? "dashboard" : eventIdFromUrl() != null ? "event" : "landing",
   );
   const [busy, setBusy] = useState(false);
 
@@ -58,6 +60,7 @@ export default function App() {
 
   const goLanding = () => { setUrl("/"); setView("landing"); };
 
+  if (view === "return" && ret) return <BookingReturn kind={ret.kind} holdId={ret.holdId} onDone={goLanding} />;
   if (view === "dashboard") return <Dashboard onExit={goLanding} />;
   if (view === "auth") return <Auth onAuthed={trySample} onBack={goLanding} />;
   if (view === "event" && eventId != null) return <EventFlow eventId={eventId} onExit={goLanding} />;

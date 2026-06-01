@@ -15,6 +15,16 @@ export function isDashboardUrl(): boolean {
     || new URLSearchParams(window.location.search).get("view") === "dashboard";
 }
 
+/** Stripe redirects here after Checkout. `/booking/success?hold=…&session_id=…`
+ * (the webhook confirms server-side; the SPA polls for the resulting booking)
+ * and `/booking/cancel?hold=…`. */
+export function bookingReturnFromUrl(): { kind: "success" | "cancel"; holdId: number } | null {
+  const m = window.location.pathname.match(/^\/booking\/(success|cancel)/);
+  if (!m) return null;
+  const hold = new URLSearchParams(window.location.search).get("hold");
+  return { kind: m[1] as "success" | "cancel", holdId: hold ? Number(hold) : NaN };
+}
+
 /** Push a shallow URL without reloading (keeps share links honest as you navigate). */
 export function setUrl(path: string) {
   window.history.replaceState(null, "", path);
