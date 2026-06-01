@@ -42,6 +42,17 @@ services:
       # Per-client edge rate limit. Raised only during the throughput sweep so the
       # benchmark measures the booking ENGINE, not this protective throttle.
       RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      # Payments (Stripe, test mode) — empty by default => offline fake flow.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      CURRENCY: ${CURRENCY:-inr}
+      # Transactional email — empty SMTP_HOST => dev outbox (logged, not sent).
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-TicketFlow <no-reply@ticketflow.dev>}
     depends_on:
       db:
         condition: service_healthy
