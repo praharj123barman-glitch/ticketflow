@@ -38,7 +38,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       ENVIRONMENT: production
-      WEB_CONCURRENCY: 4
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-4}  # gunicorn workers (override for the throughput sweep)
     depends_on:
       db:
         condition: service_healthy

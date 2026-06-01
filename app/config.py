@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     email_from: str = "TicketFlow <no-reply@ticketflow.dev>"
 
+    # DB connection pool (PER gunicorn worker). N workers => up to
+    # N*(pool_size+max_overflow) connections; keep under Postgres max_connections.
+    db_pool_size: int = 10
+    db_max_overflow: int = 10
+
     # Concurrency / infra
     lock_ttl_ms: int = 5000               # Redis lock auto-expiry (deadlock safety net)
     lock_acquire_timeout_ms: int = 2000   # how long we wait to grab a contended lock
