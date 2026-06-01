@@ -18,8 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import Base, SessionLocal, engine
 from .redis_client import redis_client
-from .routers import auth, bookings, events
+from .routers import auth, bookings, events, holds, organizer, pages, tickets, waitroom, webhooks, ws
 from .services.booking_service import release_expired_holds
+from .services.realtime import start_seat_broker
+from .services.waitroom import admit_step
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 logger = logging.getLogger("ticketflow")
@@ -43,6 +45,22 @@ async def _hold_sweeper() -> None:
             logger.exception("hold-sweeper iteration failed")
 
 
+async def _waitroom_admitter() -> None:
+    """Promote queued users into active sessions at a fixed rate. Safe to run on
+    every instance — admission is guarded by a per-event Redis lock + atomic
+    ZPOPMIN, so N admitters never exceed the threshold (see docs/HLD.md)."""
+    while True:
+        await asyncio.sleep(settings.waitroom_admit_interval_seconds)
+        if not settings.waitroom_enabled:
+            continue
+        try:
+            admitted = await asyncio.to_thread(admit_step)
+            if admitted:
+                logger.info("waitroom admitted %d user(s)", admitted)
+        except Exception:
+            logger.exception("waitroom admitter iteration failed")
+
+
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # In development we auto-create tables for convenience. In production the
@@ -50,14 +68,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # container entrypoint) — so we never silently diverge from the migration history.
     if settings.environment != "production":
         Base.metadata.create_all(bind=engine)
-    sweeper = asyncio.create_task(_hold_sweeper())
+    start_seat_broker(asyncio.get_running_loop())  # daemon thread (see realtime.py)
+    tasks = [
+        asyncio.create_task(_hold_sweeper()),
+        asyncio.create_task(_waitroom_admitter()),
+    ]
     logger.info("TicketFlow started (env=%s)", settings.environment)
     try:
         yield
     finally:
-        sweeper.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            await sweeper
+        for t in tasks:
+            t.cancel()
+        for t in tasks:
+            with contextlib.suppress(asyncio.CancelledError):
+                await t
 
 
 app = FastAPI(
@@ -77,7 +101,14 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(events.router)
+app.include_router(waitroom.router)
+app.include_router(holds.router)
 app.include_router(bookings.router)
+app.include_router(tickets.router)
+app.include_router(organizer.router)
+app.include_router(webhooks.router)
+app.include_router(ws.router)
+app.include_router(pages.router)  # public share pages: /e/{id}, /og/*, /sitemap.xml, /robots.txt
 
 
 @app.get("/health", tags=["meta"])

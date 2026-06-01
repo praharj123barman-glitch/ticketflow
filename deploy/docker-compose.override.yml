@@ -6,6 +6,8 @@ services:
   api:
     environment:
       ROOT_PATH: /api
+      # Absolute origin for OpenGraph/Twitter share tags, OG images, and sitemap.
+      PUBLIC_BASE_URL: https://ticketflow-prohorj.duckdns.org
   nginx:
     ports:
       - "443:443"

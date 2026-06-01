@@ -12,6 +12,7 @@ export default defineConfig({
       "/api": {
         target: "http://127.0.0.1:8000",
         changeOrigin: true,
+        ws: true, // proxy WebSocket upgrades (/api/ws/...) to the backend too
         rewrite: (p) => p.replace(/^\/api/, ""),
       },
     },

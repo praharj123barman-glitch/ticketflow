@@ -19,15 +19,45 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
 
     # Booking domain rules
-    seat_hold_seconds: int = 120          # how long a temporary seat hold survives
+    hold_ttl_seconds: int = 600           # how long a seat hold survives (10 min checkout window)
     max_seats_per_booking: int = 8        # guard against one user grabbing a whole row
+
+    # Payments (Stripe). Leave keys empty for offline dev: payment_service then
+    # runs in a deterministic "fake" mode so the full flow is testable without
+    # network/keys. Set test-mode keys (sk_test_..., whsec_...) for real Checkout.
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_publishable_key: str = ""
+    currency: str = "inr"
+    checkout_success_url: str = "http://localhost:5173/booking/success?hold={HOLD_ID}"
+    checkout_cancel_url: str = "http://localhost:5173/booking/cancel?hold={HOLD_ID}"
+
+    # Email. Leave smtp_host empty for the dev backend (logs + in-memory outbox).
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    email_from: str = "TicketFlow <no-reply@ticketflow.dev>"
 
     # Concurrency / infra
     lock_ttl_ms: int = 5000               # Redis lock auto-expiry (deadlock safety net)
     lock_acquire_timeout_ms: int = 2000   # how long we wait to grab a contended lock
     rate_limit_per_minute: int = 120      # per-client request budget on hot endpoints
 
+    # Virtual waiting room (on-sale spike protection). Disabled by default so the
+    # normal flow/tests are unaffected; set a LOW threshold to demo queueing.
+    waitroom_enabled: bool = False
+    waitroom_active_threshold: int = 100      # max concurrent admitted sessions per event
+    waitroom_admit_batch: int = 20            # users admitted per tick
+    waitroom_admit_interval_seconds: int = 5  # admitter tick cadence
+    waitroom_session_ttl_seconds: int = 600   # admitted session lifetime (heartbeat-refreshed)
+
     environment: str = "development"
+
+    # Public origin of the site (no trailing slash) — used to build absolute URLs
+    # for OpenGraph/Twitter share tags, the sitemap, and canonical links so link
+    # previews on WhatsApp/LinkedIn resolve correctly. Set to the prod domain on EC2.
+    public_base_url: str = "http://localhost:5173"
 
     # When the API is served behind a path prefix (e.g. nginx routes /api/* to
     # it while serving the SPA at /), set root_path="/api" so the OpenAPI docs

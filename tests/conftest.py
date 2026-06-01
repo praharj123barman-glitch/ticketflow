@@ -42,7 +42,7 @@ def db():
 @pytest.fixture
 def event_with_seats(db):
     """An event with a small seat map; returns (event_id, [seat_ids])."""
-    event = Event(name="Test Show", venue="Test Hall",
+    event = Event(name="Test Show",
                   starts_at=dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=1))
     db.add(event)
     db.flush()

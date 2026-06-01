@@ -1,5 +1,8 @@
-"""Authentication routes: register, login (OAuth2 password flow), and /me."""
+"""Authentication routes: register, login (OAuth2 password flow), guest, and /me."""
 from __future__ import annotations
+
+import secrets
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -9,7 +12,7 @@ from sqlalchemy.orm import Session
 from ..core.security import create_access_token, hash_password, verify_password
 from ..database import get_db
 from ..dependencies import get_current_user
-from ..models import User
+from ..models import Role, User
 from ..schemas import Token, UserCreate, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,6 +27,7 @@ def register(payload: UserCreate, db: Session = Depends(get_db)) -> User:
         email=payload.email,
         hashed_password=hash_password(payload.password),
         full_name=payload.full_name,
+        role=payload.role,
     )
     db.add(user)
     db.commit()
@@ -41,6 +45,25 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    return Token(access_token=create_access_token(str(user.id)))
+
+
+@router.post("/guest", response_model=Token, status_code=status.HTTP_201_CREATED)
+def guest(db: Session = Depends(get_db)) -> Token:
+    """Create a throwaway guest account and return a token, so a stranger can run
+    the full booking flow ('try a sample event') with no signup. The account is a
+    normal USER under the hood, so the two-layer lock / hold / payment paths are
+    exercised identically — it's just flagged is_guest for later cleanup."""
+    user = User(
+        email=f"guest_{uuid.uuid4().hex}@guest.ticketflow.dev",
+        hashed_password=hash_password(secrets.token_urlsafe(24)),
+        full_name="Guest",
+        role=Role.USER,
+        is_guest=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
     return Token(access_token=create_access_token(str(user.id)))
 
 
