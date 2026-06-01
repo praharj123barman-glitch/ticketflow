@@ -4,6 +4,7 @@ import type { EventDetail } from "./api";
 import { riseIn, springs, stagger, useMotionPrefs } from "./motion";
 
 const inr = (cents: number) => `₹${(cents / 100).toLocaleString("en-IN")}`;
+const CONCERTS = ["/concerts/stage-purple.jpg", "/concerts/stage-confetti.jpg", "/concerts/crowd.jpg", "/concerts/festival.jpg"];
 
 /**
  * Cinematic event landing — layered orbs drift with the cursor (parallax) and
@@ -42,6 +43,13 @@ export function EventHero({ event, onEnter }: { event: EventDetail; onEnter: () 
       onPointerMove={onMove}
       className="relative flex min-h-[82vh] items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black/40 px-6 py-16"
     >
+      {/* concert photo backdrop, tinted into the synthwave palette */}
+      <div className="pointer-events-none absolute inset-0">
+        <img src={CONCERTS[event.id % CONCERTS.length]} alt="" className="h-full w-full object-cover opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-surface/30" />
+        <div className="absolute inset-0 bg-indigo2/20 mix-blend-overlay" />
+      </div>
+
       {/* parallax depth layers */}
       <motion.div style={far} className="pointer-events-none absolute -left-32 -top-24 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
       <motion.div style={mid} className="pointer-events-none absolute -right-24 top-10 h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />

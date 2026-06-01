@@ -11,6 +11,7 @@ const FEATURES = [
 ] as const;
 
 const NAV = ["EVENTS", "SEAT MAP", "WAITING ROOM", "ORGANIZER"];
+const CONCERTS = ["/concerts/stage-purple.jpg", "/concerts/stage-confetti.jpg", "/concerts/crowd.jpg", "/concerts/festival.jpg"];
 
 export function Landing({
   onTrySample, onDemoLogin, onOpenEvent, onDashboard, busy,
@@ -27,6 +28,15 @@ export function Landing({
 
   return (
     <div className="bg-aurora min-h-screen text-ink">
+      {/* full-bleed concert backdrop behind the hero (tinted into the synthwave
+          palette + faded to navy so the headline stays crisp) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[880px] overflow-hidden">
+        <img src="/concerts/stage-purple.jpg" alt="" className="h-full w-full object-cover object-center opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface/30 via-surface/60 to-surface" />
+        <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/45 to-transparent" />
+        <div className="absolute inset-0 bg-indigo2/20 mix-blend-overlay" />
+      </div>
+
       {/* nav */}
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2">
@@ -120,7 +130,7 @@ export function Landing({
           variants={stagger(0.06)} initial="hidden" animate="show"
           className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {events.map((ev) => <PassCard key={ev.id} ev={ev} onOpen={() => onOpenEvent(ev.id)} reduced={reduced} />)}
+          {events.map((ev, i) => <PassCard key={ev.id} ev={ev} img={CONCERTS[i % CONCERTS.length]} onOpen={() => onOpenEvent(ev.id)} reduced={reduced} />)}
           {events.length === 0 && <p className="text-ink-dim">Loading events…</p>}
         </motion.div>
       </section>
@@ -159,7 +169,7 @@ export function Landing({
   );
 }
 
-function PassCard({ ev, onOpen, reduced }: { ev: Event; onOpen: () => void; reduced: boolean }) {
+function PassCard({ ev, img, onOpen, reduced }: { ev: Event; img: string; onOpen: () => void; reduced: boolean }) {
   const d = new Date(ev.starts_at);
   return (
     <motion.button
@@ -167,11 +177,14 @@ function PassCard({ ev, onOpen, reduced }: { ev: Event; onOpen: () => void; redu
       whileHover={reduced ? undefined : { y: -5 }} transition={springs.soft}
       className="group relative overflow-hidden rounded-xl border border-line bg-surface-1 text-left transition hover:border-primary/50"
     >
-      {/* pass header — gradient + notch */}
-      <div className="relative h-28 bg-gradient-to-br from-[#5937d2] via-[#7f34df] to-[#a855f7]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.25),transparent_55%)]" />
-        <span className="eyebrow absolute left-3 top-3 text-[9px] text-white/80">3-DAY PASS</span>
-        <span className="absolute bottom-2 left-3 rounded bg-black/30 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white/85">
+      {/* pass header — real concert photo, tinted into the palette + notch */}
+      <div className="relative h-32 overflow-hidden">
+        <img src={img} alt="" loading="lazy"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface-1 via-surface-1/30 to-transparent" />
+        <div className="absolute inset-0 bg-indigo2/35 mix-blend-multiply" />
+        <span className="eyebrow absolute left-3 top-3 rounded bg-black/40 px-2 py-0.5 text-[9px] text-white/90">3-DAY PASS</span>
+        <span className="absolute bottom-2 left-3 rounded bg-black/40 px-2 py-0.5 text-[10px] uppercase tracking-widest text-white/90">
           {ev.venue?.city ?? "Live"}
         </span>
         {/* perforation */}
