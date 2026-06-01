@@ -1,20 +1,104 @@
 @import "tailwindcss";
 
+/* ============================================================
+   SONORA — cyber-synthwave design system (from the Stitch project
+   "Sonora Cyber-Synthwave Landing Page"). Deep navy surfaces, lavender/
+   purple primaries, indigo + periwinkle accents. Bebas Neue display,
+   Syne accents/labels, DM Sans body.
+   ============================================================ */
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Bebas Neue", "DM Sans", sans-serif;
+  --font-accent: "Syne", "DM Sans", sans-serif;
+
+  /* Sonora surfaces (deep navy ramp) */
+  --color-surface: #051424;
+  --color-surface-low: #0d1c2d;
+  --color-surface-1: #122131;
+  --color-surface-2: #1c2b3c;
+  --color-surface-3: #273647;
+  --color-ink: #d4e4fa;        /* on-surface */
+  --color-ink-dim: #cfc2d6;    /* on-surface-variant */
+  --color-line: #4d4354;       /* outline-variant */
+
+  /* Sonora accents */
+  --color-primary: #ddb7ff;        /* lavender */
+  --color-primary-deep: #b76dff;   /* purple */
+  --color-violet2: #a855f7;
+  --color-indigo2: #3626ce;
+  --color-periwinkle: #c3c0ff;
+
+  /* Remap the cyan scale to the lavender ramp so the existing accent
+     utilities across the app become Sonora with no per-class churn. */
+  --color-cyan-100: #f5e9ff;
+  --color-cyan-200: #f0dbff;
+  --color-cyan-300: #ddb7ff;
+  --color-cyan-400: #cba6f7;
+  --color-cyan-500: #b76dff;
+  --color-cyan-600: #a855f7;
+  --color-cyan-700: #8b3ff0;
+}
+
 :root {
   color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #0a0a0f;
-  color: #e7e7ea;
+  font-family: var(--font-sans);
+  background: #051424;
+  color: #d4e4fa;
+  overflow-x: hidden;
 }
 
-/* subtle animated gradient backdrop */
+/* Full-page Sonora backdrop: navy base + lavender/indigo glows + a faint
+   perspective grid that fades toward the horizon (synthwave hallmark). */
 .bg-aurora {
+  position: relative;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(56, 189, 248, 0.12), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(99, 102, 241, 0.14), transparent 55%),
-    #0a0a0f;
+    radial-gradient(900px 520px at 12% -8%, rgba(183, 109, 255, 0.20), transparent 60%),
+    radial-gradient(820px 520px at 102% 6%, rgba(54, 38, 206, 0.22), transparent 55%),
+    radial-gradient(700px 600px at 50% 116%, rgba(168, 85, 247, 0.12), transparent 60%),
+    #051424;
 }
+.bg-aurora::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(183, 109, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(183, 109, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black, transparent 75%);
+  mask-image: radial-gradient(circle at 50% 40%, black, transparent 75%);
+}
+
+/* Typography helpers */
+.font-display { font-family: var(--font-display); letter-spacing: 0.02em; }
+.font-accent  { font-family: var(--font-accent); }
+.eyebrow {
+  font-family: var(--font-accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+/* Neon glow accents */
+.glow-primary { box-shadow: 0 0 28px -4px rgba(183, 109, 255, 0.55); }
+.glow-indigo  { box-shadow: 0 0 28px -4px rgba(54, 38, 206, 0.55); }
+.text-glow    { text-shadow: 0 0 22px rgba(183, 109, 255, 0.55); }
+
+/* Glassy surface card */
+.glass {
+  background: rgba(18, 33, 49, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(77, 67, 84, 0.6);
+}
+
+/* Custom scrollbar in the Sonora palette */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #051424; }
+::-webkit-scrollbar-thumb { background: #273647; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #3a4a5f; }

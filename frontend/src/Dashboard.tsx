@@ -28,7 +28,7 @@ function Shell({ children, onExit }: { children: React.ReactNode; onExit: () => 
     <div className="bg-aurora min-h-screen text-white">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-black/30 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="font-bold tracking-tight">🎟️ TicketFlow · Organizer</div>
+          <div className="font-display text-2xl tracking-[0.1em]">◆ TICKETFLOW · ORGANIZER</div>
           <button onClick={onExit} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/70 hover:bg-white/10">← Back to site</button>
         </div>
       </header>
@@ -54,7 +54,7 @@ function OrganizerLogin({ onDone }: { onDone: (m: Me) => void }) {
 
   return (
     <div className="mx-auto max-w-md rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-      <div className="text-xl font-bold">Organizer sign-in</div>
+      <div className="font-display text-3xl tracking-wide">ORGANIZER SIGN-IN</div>
       <p className="mt-1 text-sm text-white/50">View live sales and the conversion funnel for your events.</p>
       <form onSubmit={submit} className="mt-5 space-y-3">
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email"
@@ -110,7 +110,7 @@ function Funnels() {
           {/* conversion funnel */}
           <motion.div variants={riseIn} className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-bold">Conversion funnel</div>
+              <div className="font-display text-2xl tracking-wide">CONVERSION FUNNEL</div>
               <div className="text-sm text-white/50">Overall <span className="font-semibold text-cyan-300">{stats.funnel.view_to_paid}%</span> viewed → paid</div>
             </div>
             <div className="mt-5 space-y-3">
@@ -122,7 +122,7 @@ function Funnels() {
 
           {/* recent bookings */}
           <motion.div variants={riseIn} className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-            <div className="text-lg font-bold">Recent bookings</div>
+            <div className="font-display text-2xl tracking-wide">RECENT BOOKINGS</div>
             {stats.recent_bookings.length === 0 ? (
               <p className="mt-2 text-sm text-white/40">No bookings yet.</p>
             ) : (
@@ -153,8 +153,8 @@ function Funnels() {
 function Tile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className={`rounded-2xl border p-4 ${accent ? "border-cyan-400/30 bg-cyan-400/10" : "border-white/10 bg-white/5"}`}>
-      <div className="text-[11px] uppercase tracking-widest text-white/40">{label}</div>
-      <div className="mt-1 text-2xl font-bold">{value}</div>
+      <div className="eyebrow text-[10px] text-ink-dim">{label}</div>
+      <div className="font-display mt-1 text-3xl tracking-wide">{value}</div>
     </div>
   );
 }

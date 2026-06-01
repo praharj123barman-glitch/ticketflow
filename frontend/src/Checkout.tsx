@@ -71,7 +71,7 @@ export function Checkout({
       {/* countdown — the tension beat */}
       <motion.div variants={riseIn}
         className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-black/30 p-8 text-center">
-        <div className="text-xs uppercase tracking-[0.3em] text-white/40">Seats held for</div>
+        <div className="eyebrow text-[11px] text-ink-dim">Seats held for</div>
         <div className="relative mt-6 grid place-items-center" style={{ width: RING, height: RING }}>
           <svg width={RING} height={RING} className="-rotate-90">
             <circle cx={RING / 2} cy={RING / 2} r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={8} />
@@ -84,7 +84,7 @@ export function Checkout({
             />
           </svg>
           <motion.div
-            className="absolute font-mono text-4xl font-bold tabular-nums"
+            className="font-display absolute text-5xl tabular-nums"
             style={{ color: tone.color }}
             animate={reduced ? undefined : (tone.urgent ? { scale: [1, 1.12, 1] } : { scale: 1 })}
             transition={tone.urgent ? { repeat: Infinity, duration: 0.8 } : springs.soft}
@@ -99,7 +99,7 @@ export function Checkout({
 
       {/* order summary + pay */}
       <motion.div variants={riseIn} className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-        <div className="text-lg font-bold">Order summary</div>
+        <div className="font-display text-2xl tracking-wide">ORDER SUMMARY</div>
         <ul className="mt-4 space-y-2">
           {hold.items.map((it) => {
             const s = seatById.get(it.seat_id);

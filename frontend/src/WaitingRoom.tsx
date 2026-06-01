@@ -80,14 +80,14 @@ export function WaitingRoom({ eventId, onAdmitted }: { eventId: number; onAdmitt
           className="mx-auto mb-6 h-12 w-12 rounded-full border-2 border-cyan-400/30 border-t-cyan-400"
           animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
         />
-        <div className="text-xl font-bold tracking-tight">You're in the queue</div>
+        <div className="font-display text-4xl tracking-wide">YOU'RE IN THE QUEUE</div>
         <p className="mt-1 text-sm text-white/50">High demand — we're letting fans in a few at a time to keep things fair.</p>
 
         <div className="mt-7">
           <motion.div
             key={state?.position ?? "init"}
             initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-            className="text-5xl font-extrabold text-cyan-300"
+            className="font-display text-7xl text-primary text-glow"
           >
             {state?.position != null ? ordinal(state.position) : "…"}
           </motion.div>

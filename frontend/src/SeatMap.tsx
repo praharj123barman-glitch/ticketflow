@@ -125,7 +125,7 @@ export function SeatMap({
   return (
     <div className="relative">
       {/* stage marker */}
-      <div className="mb-3 rounded-full bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 py-2 text-center text-[10px] uppercase tracking-[0.4em] text-white/60">
+      <div className="eyebrow mb-3 rounded-md bg-gradient-to-r from-primary-deep/25 to-indigo2/30 py-2 text-center text-[11px] text-ink/70">
         Stage
       </div>
 

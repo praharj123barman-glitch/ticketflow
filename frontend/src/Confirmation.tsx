@@ -38,7 +38,7 @@ export function Confirmation({
           animate={reduced ? undefined : { scale: [0.6, 1.15, 1] }} transition={springs.pop}>
           ✓
         </motion.div>
-        <motion.h2 variants={riseIn} className="mt-4 text-3xl font-extrabold tracking-tight">You're going!</motion.h2>
+        <motion.h2 variants={riseIn} className="font-display mt-4 text-6xl text-primary text-glow">YOU'RE GOING!</motion.h2>
         <motion.p variants={riseIn} className="mt-1 text-white/55">Booking #{booking.id} confirmed · {inr(booking.total_cents)}</motion.p>
 
         {/* the e-ticket — flips in edge-on */}
@@ -49,11 +49,11 @@ export function Confirmation({
             style={{ transformStyle: "preserve-3d" }}
           >
             {/* perforation notches */}
-            <span className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-[#0a0a12]" />
-            <span className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-[#0a0a12]" />
+            <span className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-surface" />
+            <span className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-surface" />
 
-            <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/80">E-Ticket</div>
-            <div className="mt-1 text-xl font-bold leading-tight">{event?.name ?? "Your event"}</div>
+            <div className="eyebrow text-[10px] text-primary/80">E-Ticket</div>
+            <div className="font-display mt-1 text-2xl leading-tight tracking-wide">{event?.name ?? "Your event"}</div>
             <div className="mt-0.5 text-sm text-white/55">{event?.venue?.name}{event?.venue?.city ? `, ${event.venue.city}` : ""}</div>
 
             <div className="mt-4 flex items-end justify-between gap-4 border-t border-dashed border-white/15 pt-4">

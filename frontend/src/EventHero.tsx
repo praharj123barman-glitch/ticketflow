@@ -52,16 +52,16 @@ export function EventHero({ event, onEnter }: { event: EventDetail; onEnter: () 
         variants={stagger(0.08)} initial="hidden" animate="show"
         className="relative z-10 mx-auto max-w-3xl text-center"
       >
-        <motion.div variants={riseIn} className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.25em] text-cyan-200/80">
+        <motion.div variants={riseIn} className="eyebrow mb-5 inline-flex items-center gap-2 rounded-md border border-line bg-surface-1/60 px-4 py-1.5 text-[11px] text-primary/80">
           {event.venue?.city || "Live"} · {event.available} seats left
         </motion.div>
 
         {/* word-by-word headline reveal */}
-        <h1 className="flex flex-wrap justify-center gap-x-4 text-5xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-7xl">
+        <h1 className="font-display flex flex-wrap justify-center gap-x-5 text-6xl leading-[0.95] text-white sm:text-8xl">
           {words.map((w, i) => (
             <span key={i} className="inline-block overflow-hidden">
               <motion.span
-                className="inline-block bg-gradient-to-br from-white via-white to-cyan-200/70 bg-clip-text text-transparent"
+                className="inline-block bg-gradient-to-br from-white via-primary to-primary-deep bg-clip-text text-transparent"
                 initial={{ y: "110%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ ...springs.soft, delay: 0.15 + i * 0.08 }}

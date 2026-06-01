@@ -110,8 +110,8 @@ function Auth({ onAuthed, onBack }: { onAuthed: () => void; onBack?: () => void 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
         className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl"
       >
-        <div className="text-2xl font-bold tracking-tight">🎟️ TicketFlow</div>
-        <p className="mt-1 text-sm text-white/50">Concurrent seat booking — pick a seat before someone else does.</p>
+        <div className="font-display text-4xl tracking-[0.08em]">◆ TICKETFLOW</div>
+        <p className="mt-1 text-sm text-ink-dim">Concurrent seat booking — pick a seat before someone else does.</p>
 
         <div className="mt-6 flex gap-1 rounded-lg bg-white/5 p-1 text-sm">
           {(["login", "register"] as const).map((m) => (
@@ -275,8 +275,8 @@ function Booker({ eventId, onExit }: { eventId: number; onExit: () => void }) {
           <div className="flex items-center gap-3">
             <button onClick={onExit} title="All events" className="rounded-lg border border-white/10 px-2.5 py-1.5 text-sm text-white/60 hover:bg-white/10">←</button>
             <button onClick={() => go("hero")} className="text-left">
-              <div className="text-lg font-bold tracking-tight">🎟️ {event?.name ?? "TicketFlow"}</div>
-              <div className="text-xs text-white/50">{event?.venue?.name ?? "Venue"} · {counts.available} available · {counts.sold} sold</div>
+              <div className="font-display text-2xl tracking-wide">{event?.name ?? "TICKETFLOW"}</div>
+              <div className="eyebrow text-[10px] text-ink-dim">{event?.venue?.name ?? "Venue"} · {counts.available} available · {counts.sold} sold</div>
             </button>
           </div>
           <button onClick={() => { setToken(null); onExit(); }} className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/70 hover:bg-white/10">
@@ -302,7 +302,7 @@ function Booker({ eventId, onExit }: { eventId: number; onExit: () => void }) {
                 </section>
                 <aside className="space-y-4">
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <div className="text-sm font-semibold">Your selection</div>
+                    <div className="eyebrow text-[11px] text-ink-dim">Your selection</div>
                     {selectedSeats.length === 0 ? (
                       <p className="mt-2 text-sm text-white/40">Tap available seats to select (up to {MAX}).</p>
                     ) : (
@@ -323,7 +323,7 @@ function Booker({ eventId, onExit }: { eventId: number; onExit: () => void }) {
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-                    <div className="text-sm font-semibold">My bookings</div>
+                    <div className="eyebrow text-[11px] text-ink-dim">My bookings</div>
                     {bookings.length === 0 ? (
                       <p className="mt-2 text-sm text-white/40">No bookings yet.</p>
                     ) : (
