@@ -105,7 +105,7 @@ export function Checkout({
             const s = seatById.get(it.seat_id);
             return (
               <li key={it.seat_id} className="flex items-center justify-between rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm">
-                <span className="text-white/80">{s ? `${s.section} · ${s.seat_number}` : `Seat ${it.seat_id}`}</span>
+                <span className="text-white/80">{s ? s.seat_number : `Seat ${it.seat_id}`}</span>
                 <span className="font-medium">{inr(it.price_cents)}</span>
               </li>
             );

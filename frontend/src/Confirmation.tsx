@@ -25,7 +25,7 @@ export function Confirmation({
   }, [firstTicket]);
 
   const seatLabels = booking.items
-    .map((it) => { const s = seatById.get(it.seat_id); return s ? `${s.section} ${s.seat_number}` : `#${it.seat_id}`; })
+    .map((it) => { const s = seatById.get(it.seat_id); return s ? s.seat_number : `#${it.seat_id}`; })
     .join(" · ");
   const date = event ? new Date(event.starts_at) : null;
 
