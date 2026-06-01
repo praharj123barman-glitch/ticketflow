@@ -39,6 +39,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       ENVIRONMENT: production
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-4}  # gunicorn workers (override for the throughput sweep)
+      # Per-client edge rate limit. Raised only during the throughput sweep so the
+      # benchmark measures the booking ENGINE, not this protective throttle.
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
     depends_on:
       db:
         condition: service_healthy
