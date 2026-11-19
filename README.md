@@ -1,10 +1,11 @@
 # 🎟️ TicketFlow — Concurrent Event Booking System
 
 [![CI](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml/badge.svg)](https://github.com/praharj123barman-glitch/ticketflow/actions/workflows/ci.yml)
-
-### 🔴 Live demo — one self-hosted HTTPS origin
-- **App:** https://ticketflow-prohorj.duckdns.org — demo login `demo@ticketflow.dev` / `password123`
-- **API + Swagger:** https://ticketflow-prohorj.duckdns.org/api/docs
+### 🔴 Live demo — one HTTPS origin (site + API)
+- **App:** https://ticketflow-n8k6.onrender.com — demo login `demo@ticketflow.dev` / `password123`
+- **API + Swagger:** https://ticketflow-n8k6.onrender.com/api/docs
+- Free tier: the first visit after ~15 min idle takes ~30–60 s to wake up.
+- Originally deployed on AWS EC2 (Docker Compose, nginx reverse proxy, Let's Encrypt HTTPS); now served from Render with the same single-origin layout — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 - Deployed on AWS EC2: a single nginx serves the React build at `/` and reverse-proxies the API at `/api/*` to gunicorn, with Let's Encrypt HTTPS — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 A production-shaped backend for booking event tickets where thousands of users
@@ -157,16 +158,16 @@ A 10-minute routine to get real visitors and real numbers:
 
 1. **Seed events** (already done on the live box; re-run any time):
    `docker compose exec api python seed.py` — idempotent, adds the 4 events.
-2. **Sanity-check the live site**: open the [landing page](https://ticketflow-prohorj.duckdns.org),
+2. **Sanity-check the live site**: open the [landing page](https://ticketflow-n8k6.onrender.com),
    click **Try a sample event** (no signup) and complete one booking end-to-end.
 3. **Grab share links** — one per event, they preview with a title + image:
-   - `https://ticketflow-prohorj.duckdns.org/e/1` (Coldplay), `/e/2`, `/e/3`, `/e/4`
+   - `https://ticketflow-n8k6.onrender.com/e/1` (Coldplay), `/e/2`, `/e/3`, `/e/4`
    - Paste a link into **WhatsApp** and **LinkedIn** to confirm the OpenGraph card
      renders (title, description, the generated `/og/event/{id}.png`). Use the
      [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) to force a re-scrape.
 4. **Share in a few places** — a class/college WhatsApp group, a LinkedIn post,
    a Reddit/Discord community. Each unique visitor counts once in the funnel.
-5. **Watch conversions**: open the [organizer dashboard](https://ticketflow-prohorj.duckdns.org/dashboard)
+5. **Watch conversions**: open the [organizer dashboard](https://ticketflow-n8k6.onrender.com/dashboard)
    (login `organizer@ticketflow.dev` / `password123`), pick an event, and watch
    **Viewed → Held → Paid** climb.
 
