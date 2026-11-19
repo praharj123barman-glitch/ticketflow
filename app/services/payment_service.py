@@ -78,6 +78,10 @@ def verify_webhook(payload: bytes, sig_header: str | None) -> dict:
     if settings.stripe_webhook_secret and stripe is not None:
         event = _client().Webhook.construct_event(payload, sig_header, settings.stripe_webhook_secret)
         return event if isinstance(event, dict) else event.to_dict()
+    if stripe_enabled():
+        # Real payments are on but no signing secret is configured: refuse rather
+        # than trust an unsigned payload, or anyone could forge "payment completed".
+        raise ValueError("STRIPE_WEBHOOK_SECRET is required when Stripe is enabled")
     return json.loads(payload.decode("utf-8") if isinstance(payload, bytes) else payload)
 
 
