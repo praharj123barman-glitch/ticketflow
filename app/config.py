@@ -3,6 +3,7 @@
 Using pydantic-settings means every value is validated on startup and can be
 overridden by an env var or the .env file — the standard 12-factor approach.
 """
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -67,6 +68,16 @@ class Settings(BaseSettings):
     # it while serving the SPA at /), set root_path="/api" so the OpenAPI docs
     # generate correct URLs. Empty in local dev / CI.
     root_path: str = ""
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_psycopg_driver(cls, v: str) -> str:
+        # Managed Postgres (Render, Heroku, ...) hands out postgres:// or
+        # postgresql:// URLs; SQLAlchemy needs the explicit psycopg3 driver.
+        for prefix in ("postgres://", "postgresql://"):
+            if v.startswith(prefix):
+                return "postgresql+psycopg://" + v[len(prefix):]
+        return v
 
 
 settings = Settings()

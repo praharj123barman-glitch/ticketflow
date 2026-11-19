@@ -1,0 +1,49 @@
+# Render Blueprint: one web service (site + API), Postgres, and Redis-compatible
+# Key Value, all on the free plan. Deploy: Render dashboard -> New -> Blueprint
+# -> pick this repo. Note: Render's free Postgres expires 30 days after creation.
+services:
+  - type: web
+    name: ticketflow
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ticketflow-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: ticketflow-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "5"
+      # Trust Render's proxy headers so rate limiting sees the real client IP.
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"
+
+  - type: keyvalue
+    name: ticketflow-redis
+    plan: free
+    region: singapore
+    maxmemoryPolicy: noeviction
+    ipAllowList: []   # internal access only
+
+databases:
+  - name: ticketflow-db
+    plan: free
+    region: singapore
+    databaseName: ticketflow
+    user: ticketflow

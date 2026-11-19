@@ -56,6 +56,20 @@ cd .. && sudo docker compose up -d                # opens 443, mounts certs + di
 - The SPA calls the API at the same origin (`/api/...`), so there is no CORS and
   no mixed content. See `deploy/` for the exact production config files.
 
+## Alternative: Render (free, no VM)
+`render.yaml` is a Render Blueprint: one Docker web service (`Dockerfile.render`)
+plus free Postgres and free Key Value (Redis). With no nginx in front,
+`app/render_app.py` does nginx's routing in-process: the API is mounted at
+`/api` (Swagger at `/api/docs`), share pages stay at `/e/`, `/og/`,
+`/sitemap.xml` and `/robots.txt`, and everything else serves the React build
+with an SPA fallback. `render_start.sh` runs migrations, seeds demo data, and
+starts gunicorn on `$PORT`.
+
+Deploy: Render dashboard -> **New -> Blueprint** -> select this repo -> **Apply**.
+Free-tier caveats: the service sleeps after ~15 min idle (the first request
+takes ~30-60 s to wake it), and the free Postgres expires 30 days after
+creation.
+
 ## Operating notes
 - **Keep the instance running** during placement season — `t3.small` on the
   $100 free-plan credits lasts ~6 months 24/7. Stopping it takes the live demo
