@@ -10,12 +10,15 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import time
+import uuid
 from collections.abc import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .core.logging import configure_logging
 from .database import Base, SessionLocal, engine
 from .redis_client import redis_client
 from .routers import auth, bookings, events, holds, organizer, pages, tickets, waitroom, webhooks, ws
@@ -23,8 +26,9 @@ from .services.booking_service import release_expired_holds
 from .services.realtime import start_seat_broker
 from .services.waitroom import admit_step
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+configure_logging(settings.log_format)
 logger = logging.getLogger("ticketflow")
+access_logger = logging.getLogger("ticketflow.access")
 
 _SWEEP_INTERVAL_SECONDS = 15
 
@@ -98,6 +102,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """One structured log line per request, tagged with a request id (taken
+    from an incoming X-Request-ID or generated) that is echoed back in the
+    response so a client-side error can be matched to its server log line."""
+    request_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:12]
+    fields = {"request_id": request_id, "method": request.method, "path": request.url.path}
+    start = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        access_logger.exception("request failed", extra=fields)
+        raise
+    response.headers["X-Request-ID"] = request_id
+    access_logger.info("request", extra={**fields, "status": response.status_code,
+                                         "duration_ms": round((time.perf_counter() - start) * 1000, 1)})
+    return response
 
 app.include_router(auth.router)
 app.include_router(events.router)

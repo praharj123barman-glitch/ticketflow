@@ -59,6 +59,9 @@ class Settings(BaseSettings):
 
     environment: str = "development"
 
+    # "json" = one JSON object per log line (structured); "text" = plain lines.
+    log_format: str = "json"
+
     # Public origin of the site (no trailing slash) — used to build absolute URLs
     # for OpenGraph/Twitter share tags, the sitemap, and canonical links so link
     # previews on WhatsApp/LinkedIn resolve correctly. Set to the prod domain on EC2.
