@@ -6,7 +6,6 @@
 - **API + Swagger:** https://ticketflow-n8k6.onrender.com/api/docs
 - Free tier: the first visit after ~15 min idle takes ~30–60 s to wake up.
 - Originally deployed on AWS EC2 (Docker Compose, nginx reverse proxy, Let's Encrypt HTTPS); now served from Render with the same single-origin layout — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-- Deployed on AWS EC2: a single nginx serves the React build at `/` and reverse-proxies the API at `/api/*` to gunicorn, with Let's Encrypt HTTPS — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 A production-shaped backend for booking event tickets where thousands of users
 compete for the **same limited seats** at once. The engineering centrepiece is a
